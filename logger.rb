@@ -42,7 +42,13 @@ bot = Cinch::Bot.new do
 
     # Trying to avoid "Excess Flood"
     c.messages_per_second = 0.4
+  end
 
+  # Catch Bancho's RPL_ENDOFMOTD, which means we're up and running
+  on :"376" do |m|
+    m.bot.config.channels.each do |ch|
+      Channel(ch).join
+    end
   end
 end
 
