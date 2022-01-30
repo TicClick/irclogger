@@ -2,64 +2,74 @@
 
 $: << File.join(File.dirname(__FILE__), 'lib')
 
+require 'active_support'
+require 'active_support/core_ext/hash'
+
 require 'irclogger'
-require 'irclogger/cinch_plugin'
 require 'redis'
 require 'daemons'
+require 'rubygems'
+require 'summer'
+require 'yaml'
 
-IrcLogger::CinchPlugin.redis = Redis.new(url: Config['redis'])
+ACTION_PREFIX = "\01ACTION "
 
-pidfile = File.join(File.expand_path(File.dirname(__FILE__)), 'tmp', 'logger.pid')
-logfile = File.join(File.expand_path(File.dirname(__FILE__)), 'log', 'logger.log')
+PIDFILE = File.join(File.expand_path(File.dirname(__FILE__)), 'tmp', 'logger.pid')
+LOGFILE = File.join(File.expand_path(File.dirname(__FILE__)), 'log', 'logger.log')
+CONFIG_FILE = File.join(File.expand_path(File.dirname(__FILE__)), 'config', 'application.yml')
 
-begin
-  old_pid = File.read(pidfile).to_i
-  Process.kill 0, old_pid
+class Bot < Summer::Connection
 
-  raise "An existing logger process is running with pid #{old_pid}. Refusing to start"
-rescue Errno::ESRCH, Errno::ENOENT
-end
-
-bot = Cinch::Bot.new do
-  configure do |c|
-    # Server config
-    c.server   = Config['server']
-    c.port     = Config['port'] unless Config['port'].nil?
-    c.ssl.use  = Config['ssl'] unless Config['ssl'].nil?
-
-    # Auth config
-    c.user     = Config['username']
-    c.password = Config['password'] unless Config['password'].nil?
-    c.realname = Config['realname']
-    c.nicks    = [Config['nickname']]
-    c.nick     = Config['nickname']
-
-    # Logging config
-    c.channels = Config['channels']
-
-    # cinch, oh god why?!
-    c.plugins.plugins = [IrcLogger::CinchPlugin]
-
-    # Trying to avoid "Excess Flood"
-    c.messages_per_second = 0.4
-  end
-
-  # Catch Bancho's RPL_ENDOFMOTD, which means we're up and running
-  on :"376" do |m|
-    m.bot.config.channels.each do |ch|
-      Channel(ch).join
+    def redis
+      self.class.redis
     end
-  end
+    protected :redis
+
+    class << self
+      attr_accessor :redis
+    end
+
+    def load_config
+        @config = HashWithIndifferentAccess.new(YAML::load_file(CONFIG_FILE))
+
+        # backwards compatibility with whitequark's cinch plugin
+        @config['server_password'] = @config['password']
+        @config['nick'] = @config['username']
+        @config['use_ssl'] = @config['ssl'] || false
+
+        # required by summer
+        @config['log_file'] = LOGFILE
+        @config['pid_file'] = PIDFILE
+
+      end
+
+    def pid_file
+        config[:pid_file]
+    end
+
+    def channel_message(sender, channel, message, options={})
+        utcnow = Time.now.utc
+        nick = sender[:nick]
+        if message.start_with?(ACTION_PREFIX)
+            message.delete_prefix(ACTION_PREFIX)
+            nick = "* " + nick
+        end
+
+        post_message(
+          channel: channel,
+          timestamp: utcnow,
+          nick: nick,
+          line: message,
+        )
+    end
+
+    def post_message(*args)
+      message = Message.create(*args)
+      redis.publish("message.#{Config['server']}", "#{message.channel} #{message.id}")
+    end
 end
 
-# Who logs the loggers?
-bot.loggers.level = :info
-
+Bot.redis = Redis.new(url: Config['redis'])
 DB.disconnect
-Daemonize.daemonize(logfile)
-
-File.open(pidfile, 'w') do |f|
-  f.write Process.pid
-end
-
-bot.start
+Daemonize.daemonize(LOGFILE)
+Bot.new()

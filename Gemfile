@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'sinatra', '~> 2.0'
 gem 'sinatra-contrib', '~> 2.0'
@@ -19,5 +19,5 @@ gem 'em-hiredis'
 
 gem 'thin'
 
-gem 'cinch'
+gem 'summer', :git => 'https://github.com/radar/summer'
 gem 'daemons'
