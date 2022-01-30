@@ -2,5 +2,6 @@
 tmp/*
 log/*
 config/application.yml
+run.sh
 .bundle
 vendor/bundle
