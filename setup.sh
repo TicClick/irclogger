@@ -33,9 +33,9 @@ EOF
 
   echo "all done. helpful stuff:"
   echo "    run: ./run.sh"
-  echo "  debug: docker exec -it irclog /bin/bash"
-  echo "  patch: docker cp /path/to/file irclog:/path/to/file"
-  echo "   peek: docker stats / docker top irclog aufx / docker ps"
+  echo "  debug: docker exec -it containerid /bin/bash"
+  echo "  patch: docker cp /path/to/file containerid:/path/to/file"
+  echo "   peek: docker stats / docker top containerid aufx / docker ps"
 }
 
 function install_docker() {

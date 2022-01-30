@@ -5,5 +5,16 @@ redeye is a fork of [whitequark's irclogger](https://github.com/whitequark/irclo
 ## setup
 
 ```sh
+git clone https://github.com/TicClick/redeye
 ./setup.sh -u osu_username -p osu_password -d your.domain
+```
+
+## update
+
+```sh
+docker exec -it containerid /bin/bash
+git pull
+bundle install --deployment
+sudo -iu irclog
+service irclogger-logger restart && service irclogger-viewer restart
 ```
