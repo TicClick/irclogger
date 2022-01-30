@@ -13,10 +13,9 @@ require 'summer'
 require 'yaml'
 
 ACTION_PREFIX = "\01ACTION "
-DUMMY_STDOUT = StringIO.new
 
 def silenced
-  $stdout = DUMMY_STDOUT
+  $stdout = StringIO.new
   yield
 ensure
   $stdout = STDOUT
