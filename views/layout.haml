@@ -42,13 +42,12 @@
             %a{href: '/help/search'}
               ?
 
-      - if request.host == Config['domain']
-        %ul#channels
-          %li{class: "#{"current" unless @channel}"}
-            %a{href: '/'} Console
+      %ul#channels
+        %li{class: "#{"current" unless @channel}"}
+          %a{href: '/'} Console
 
-          - @channels.each do |channel|
-            %li{class: "#{"current" if channel == @channel}"}
-              %a{href: channel_url(channel)}= channel
+        - @channels.each do |channel|
+          %li{class: "#{"current" if channel == @channel}"}
+            %a{href: channel_url(channel)}= channel
 
     = yield
