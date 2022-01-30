@@ -13,6 +13,14 @@ require 'summer'
 require 'yaml'
 
 ACTION_PREFIX = "\01ACTION "
+DUMMY_STDOUT = StringIO.new
+
+def silenced
+  $stdout = DUMMY_STDOUT
+  yield
+ensure
+  $stdout = STDOUT
+end
 
 PIDFILE = File.join(File.expand_path(File.dirname(__FILE__)), 'tmp', 'logger.pid')
 LOGFILE = File.join(File.expand_path(File.dirname(__FILE__)), 'log', 'logger.log')
@@ -45,6 +53,20 @@ class Bot < Summer::Connection
 
     def pid_file
         config[:pid_file]
+    end
+
+    # summer's `parse` prints EVERYTHING the bot has received, which is... a lot. 
+    def parse(message)
+      silenced do
+        super
+      end
+    end
+
+    # silence outgoing messages as well
+    def response(message)
+      silenced do
+        super
+      end
     end
 
     def channel_message(sender, channel, message, options={})
