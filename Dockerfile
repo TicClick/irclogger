@@ -38,7 +38,8 @@ RUN service postgresql start && \
     echo 'CREATE EXTENSION IF NOT EXISTS btree_gin' | sudo -u irclog psql --dbname irclog && \
     sudo -u irclog psql --dbname irclog --file $CONTAINER_ROOT/config/sql/postgresql-schema.sql
 
-COPY <<EOF config/application.yml
+# workaround for https://github.com/moby/buildkit/issues/2439 which allows for variable expansion
+RUN cat > config/application.yml <<EOF
 ---
 database: postgres:///irclog?user=irclog
 redis: redis://localhost:6379
@@ -49,46 +50,46 @@ server: cho.ppy.sh
 username: "$OSU_USERNAME"
 password: "$OSU_PASSWORD"
 channels:
-  - '#announce'
-  - '#arabic'
-  - '#balkan'
-  - '#bulgarian'
-  - '#cantonese'
-  - '#chinese'
-  - '#ctb'
-  - '#czechoslovak'
-  - '#dutch'
-  - '#english'
-  - '#filipino'
-  - '#finnish'
-  - '#french'
-  - '#german'
-  - '#greek'
-  - '#hebrew'
-  - '#help'
-  - '#hungarian'
-  - '#indonesian'
-  - '#italian'
-  - '#japanese'
-  - '#korean'
-  - '#lobby'
-  - '#malaysian'
-  - '#mapping'
-  - '#modreqs'
-  - '#osu'
-  - '#osumania'
-  - '#polish'
-  - '#portuguese'
-  - '#romanian'
-  - '#russian'
-  - '#skandinavian'
-  - '#spanish'
-  - '#taiko'
-  - '#thai'
-  - '#turkish'
-  - '#ukrainian'
-  - '#videogames'
-  - '#vietnamese'
+  - "#announce"
+  - "#arabic"
+  - "#balkan"
+  - "#bulgarian"
+  - "#cantonese"
+  - "#chinese"
+  - "#ctb"
+  - "#czechoslovak"
+  - "#dutch"
+  - "#english"
+  - "#filipino"
+  - "#finnish"
+  - "#french"
+  - "#german"
+  - "#greek"
+  - "#hebrew"
+  - "#help"
+  - "#hungarian"
+  - "#indonesian"
+  - "#italian"
+  - "#japanese"
+  - "#korean"
+  - "#lobby"
+  - "#malaysian"
+  - "#mapping"
+  - "#modreqs"
+  - "#osu"
+  - "#osumania"
+  - "#polish"
+  - "#portuguese"
+  - "#romanian"
+  - "#russian"
+  - "#skandinavian"
+  - "#spanish"
+  - "#taiko"
+  - "#thai"
+  - "#turkish"
+  - "#ukrainian"
+  - "#videogames"
+  - "#vietnamese"
 EOF
 
 # this relies on an existing symbolic link,
