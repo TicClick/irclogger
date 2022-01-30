@@ -27,6 +27,14 @@ LOGFILE = File.join(File.expand_path(File.dirname(__FILE__)), 'log', 'logger.log
 CONFIG_FILE = File.join(File.expand_path(File.dirname(__FILE__)), 'config', 'application.yml')
 
 class Bot < Summer::Connection
+    def initialize(server=nil, port=6667, dry=false)  
+      trap(:TERM) do
+        puts "Shutting down on SIGTERM..."
+        FileUtils.rm_rf(pid_file)
+        exit
+      end
+      super
+    end
 
     def redis
       self.class.redis
