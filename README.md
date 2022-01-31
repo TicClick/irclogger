@@ -9,6 +9,8 @@ git clone https://github.com/TicClick/redeye
 ./setup.sh -u osu_username -p osu_password -d your.domain
 ```
 
+to set up nginx on the host machine, refer to `config/nginx-external.conf.example`.
+
 ## update
 
 ```sh
