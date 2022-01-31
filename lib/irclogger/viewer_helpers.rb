@@ -104,7 +104,7 @@ module IrcLogger
     end
 
     CAL_CACHE = Hash.new do |h, k|
-                  h[k] = `cal #{k}`.split("\n")
+                  h[k] = `ncal -b -h -M #{k}`.split("\n")
                 end
 
     def calendar(channel, date=nil, links=true)
