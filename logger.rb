@@ -80,7 +80,7 @@ class Bot < Summer::Connection
         utcnow = Time.now.utc
         nick = sender[:nick]
         if message.start_with?(ACTION_PREFIX)
-            message.delete_prefix(ACTION_PREFIX)
+            message.delete_prefix!(ACTION_PREFIX)
             nick = "* " + nick
         end
 
